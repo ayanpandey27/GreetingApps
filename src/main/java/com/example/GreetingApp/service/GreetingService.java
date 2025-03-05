@@ -1,41 +1,38 @@
 package com.example.GreetingApp.service;
 import com.example.GreetingApp.model.Greeting;
-import com.example.GreetingApp.repository.GreetingRepository;
-import org.springframework.stereotype.Service;
-import java.util.Optional;
+import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-@Service
-public class GreetingService {
+@RestController
+@RequestMapping("/greeting")
+public class GreetingController {
 
-    private final GreetingRepository greetingRepository;
+    private final GreetingService greetingService;
 
-    public GreetingService(GreetingRepository greetingRepository) {
-        this.greetingRepository = greetingRepository;
+    public GreetingController(GreetingService greetingService) {
+        this.greetingService = greetingService;
     }
 
     // Fetch Greeting by ID
-    public Greeting getGreetingById(Long id) {
-        return greetingRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Greeting not found with ID: " + id));
+    @GetMapping("/{id}")
+    public Greeting getGreetingById(@PathVariable Long id) {
+        return greetingService.getGreetingById(id);
     }
-    public Greeting saveGreeting(Greeting greeting) {
-        return greetingRepository.save(greeting);
+    @PostMapping("/save")
+    public Greeting createGreeting(@RequestBody Greeting greeting) {
+        return greetingService.saveGreeting(greeting);
     }
+    @GetMapping
     public List<Greeting> getAllGreetings() {
-        return greetingRepository.findAll();
+        return greetingService.getAllGreetings();
     }
-    public Greeting updateGreeting(Long id, Greeting newGreeting) {
-        Greeting existingGreeting = greetingRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Greeting not found with ID: " + id));
-        existingGreeting.setMessage(newGreeting.getMessage());
-        return greetingRepository.save(existingGreeting);
+    @PutMapping("/{id}")
+    public Greeting updateGreeting(@PathVariable Long id, @RequestBody Greeting newGreeting) {
+        return greetingService.updateGreeting(id, newGreeting);
     }
-    public void deleteGreeting(Long id) {
-        if (!greetingRepository.existsById(id)) {
-            throw new RuntimeException("Greeting not found with ID: " + id);
-        }
-        greetingRepository.deleteById(id);
+    @DeleteMapping("/{id}")
+    public String deleteGreeting(@PathVariable Long id) {
+        greetingService.deleteGreeting(id);
+        return "Greeting with ID " + id + " deleted successfully!";
     }
-
 }
